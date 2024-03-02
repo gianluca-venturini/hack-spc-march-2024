@@ -32,10 +32,10 @@ export async function GET(request: Request) {
     const systemPrompt = `
         You are summarizing the user questions from a crowd.
         The response will be in json format \`{ question: '' }\`.
-        Only if you haven't asked this question before, ask it, otherwise return \`{ noop: true }\`.
         You want to use a friendly tone asking the shortest possible question.
         Ask the most popular question.
-        ${questionsAsked.length > 0 ? `Don't repeat the following questions: \n${questionsAsked.map(q => `- ${q}`).join('\n')}` : ""}
+        If you don't have a new question, respond with \`{ noop: true }\`.
+        ${questionsAsked.length > 0 ? `Ignore any question similar to: \n${questionsAsked.map(q => `- ${q}`).join('\n')}` : ""}
     `;
     console.log(systemPrompt);
 
