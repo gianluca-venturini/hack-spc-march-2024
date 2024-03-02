@@ -58,10 +58,11 @@ export async function GET(request: Request) {
       { role: "user" as const, content: questions.join("\n") },
       // ...questions.map(question => ({ role: 'user' as const, content: question })),
     ],
-    stream: true,
+    stream: false,
   });
 
-  const stream = OpenAIStream(response);
+  return new Response(response.choices[0].message.content, {
+    status: 200,
+  });
 
-  return new StreamingTextResponse(stream);
 }
