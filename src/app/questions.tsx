@@ -7,11 +7,11 @@ interface Question {
 }
  
 export function QuestionsAggregated() {
-  const [questions, setQuestions] = useState<Question[]>([
-  ]);
+  const [questions, setQuestions] = useState<string>('');
 
   useEffect(() => {
     const fetchData = async () => {
+      setQuestions('');
       try {
         const response = await fetch('/api/questions');
         if (!response.body) {
@@ -27,13 +27,7 @@ export function QuestionsAggregated() {
             return;
           }
           const chunk = decoder.decode(value, {stream: true});
-          setQuestions(prevQuestions => {
-            if (prevQuestions.length === 0) {
-              return [{ text: chunk }];
-            }
-            return [{ text: prevQuestions[0].text + chunk }];
-          });
-          // Read the next chunk
+          setQuestions(prevQuestions => prevQuestions + chunk);
           reader.read().then(processText);
         });
       } catch (error) {
@@ -45,9 +39,9 @@ export function QuestionsAggregated() {
   }, []);
  
   return (
-    <div>
-      {questions.map(q => (
-        <div key={q.text}>{q.text}</div>
+    <div className="flex flex-col gap-4">
+      {questions.split('\n').map(q => (
+        <div key={q}>{q}</div>
       ))}
     </div>
   )
