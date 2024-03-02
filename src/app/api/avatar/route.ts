@@ -11,7 +11,6 @@ interface IngestAvatar {
 export async function POST(request: Request) {
     const requestData: IngestAvatar = await request.json();
     console.log('Received a new avatar', requestData);
-    setValue(`${AVATAR_PREFIX}${uuid()}`, requestData.text);
     const body = { message: 'Your avatar have been received, Thank you!', requestData };
     return new Response(JSON.stringify(body), {
         status: 201,
