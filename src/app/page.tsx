@@ -2,6 +2,7 @@ import Image from "next/image";
 import { QuestionsAggregated } from "./questions";
 import { testLLM } from "./server";
 import { redisClient } from "./api/clients/redis";
+import React from "react";
 
 export default async function Home() {
   return (
