@@ -7,7 +7,6 @@ export async function setValue(key: string, value: string) {
 
 export async function getValuesByPrefix(prefix: string): Promise<string[]> {
     try {
-        // Find all keys starting with 'foo-'
         const keys = await redisClient.keys(`${prefix}*`);
         
         // If no keys found, return empty or handle as needed

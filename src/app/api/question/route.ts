@@ -38,12 +38,19 @@ export async function GET(request: Request) {
         });
     }
 
+    console.log('Questions:', questions);
+
     const response = await openai.chat.completions.create({
         // model: 'gpt-4-turbo-preview',
         model: 'gpt-3.5-turbo-0125',
         messages: [
-            { role: 'system', content: 'Summarize the following questions' },
-            { role: 'user', content: questions.join("\n") }
+            { role: 'system', content: `
+                You are summarizing the user questions from a crowd.
+                You want to use a friendly tone asking the shortest possible question.
+                Ask the most popular question.
+            ` },
+            { role: 'user' as const, content: questions.join('\n') },
+            // ...questions.map(question => ({ role: 'user' as const, content: question })),
         ],
         stream: true,
     });

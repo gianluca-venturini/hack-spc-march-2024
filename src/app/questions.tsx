@@ -13,7 +13,7 @@ export function QuestionsAggregated() {
     const fetchData = async () => {
       setQuestions('');
       try {
-        const response = await fetch('/api/questions');
+        const response = await fetch('/api/question');
         if (!response.body) {
           throw new Error('ReadableStream not supported in this browser.');
         }
