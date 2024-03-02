@@ -10,7 +10,7 @@ export async function POST(request: Request) {
     console.log('Received a new question', requestData);
     const body = { message: 'Your questions have been received, we will answer it shortly. Thank you!', requestData };
     return new Response(JSON.stringify(body), {
-        status: 200,
+        status: 201,
         headers: {
             'Content-Type': 'application/json'
         }
