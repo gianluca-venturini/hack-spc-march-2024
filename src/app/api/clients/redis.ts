@@ -37,5 +37,7 @@ export async function deleteAll() {
 
 const UPSTASH_API_KEY = process.env.UPSTASH_API_KEY;
 export const redisClient = new Redis(
-`rediss://default:${UPSTASH_API_KEY}@usw1-magnetic-yak-33900.upstash.io:33900`
+    `rediss://default:${UPSTASH_API_KEY}@usw1-magnetic-yak-33900.upstash.io:33900`, {
+        connectTimeout: 30000 // Timeout in milliseconds
+    }
 );
