@@ -1,0 +1,1 @@
+const NO_CONTENT_HEADER = 'x-no-content';

@@ -54,16 +54,15 @@ async function fetchQuestions(): Promise<string[]> {
 // }
 
 export async function GET(request: Request) {
-
-
-
     const questions = await fetchQuestions();
-    // if (questions.length === 0) {
-    //     let res=  Response.next();
-    //     res('X-No-Questions', 'true');
-    //     return res.status(200).json({ message: 'No questions to aggregate' });
-    //   }
-
+    if (questions.length === 0) {
+        return new Response('', {
+            status: 200,
+            headers: {
+                [NO_CONTENT_HEADER]: 'true'
+            }
+        });
+    }
 
     const response = await openai.chat.completions.create({
         // model: 'gpt-4-turbo-preview',
