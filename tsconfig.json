@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "target": "es2020", // or a more recent version like "es2020", "es2022", or "esnext"
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,

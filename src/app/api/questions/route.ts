@@ -1,10 +1,35 @@
 import { NextApiRequest, NextApiResponse } from 'next/types';
 import OpenAI from 'openai';
 import { OpenAIStream, StreamingTextResponse } from 'ai'
+import { createClient, RedisClientType } from 'redis';
+import {NextResponse} from "next/server";
 
 const openai = new OpenAI({
     apiKey: process.env['OPENAI_API_KEY']
 });
+
+// Connect to redis!!!! @teo
+// const redisClient: RedisClientType = createClient({
+//   url: 'redis://localhost:6379', // Your Redis URL
+// });
+// await redisClient.connect();
+
+// Function to fetch questions from Redis
+async function fetchQuestions(): Promise<string[]> {
+  // Assuming questions are stored in a list called "questions"
+  // const questions = await redisClient.lRange("questions", 0, -1);
+
+
+  // questions is a list of questions
+
+    let questions: string[] = [
+    "What is your name?",
+    "How old are you?",
+    "Where are you from?"
+];
+  return questions;
+}
+
 
 // export async function testLLM() {
 
@@ -29,10 +54,21 @@ const openai = new OpenAI({
 // }
 
 export async function GET(request: Request) {
+
+
+
+    const questions = await fetchQuestions();
+    // if (questions.length === 0) {
+    //     let res=  Response.next();
+    //     res('X-No-Questions', 'true');
+    //     return res.status(200).json({ message: 'No questions to aggregate' });
+    //   }
+
+
     const response = await openai.chat.completions.create({
         // model: 'gpt-4-turbo-preview',
         model: 'gpt-3.5-turbo-0125',
-        messages: [{ role: 'user', content: 'Give me the first chapter of the divine commedy' }],
+        messages: [{ role: 'user', content: 'Summarize the following questions' + questions.join("\n") }],
         stream: true,
     });
 
