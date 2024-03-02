@@ -7,7 +7,7 @@ import { NO_CONTENT_HEADER, QUESTION_PREFIX } from "@/constants";
 
 export const runtime = "nodejs";
 export const preferredRegion = "sfo1";
-export const maxDuration = 300; // seconds
+export const maxDuration = 10; // seconds
 
 const openai = new OpenAI({
   apiKey: process.env["OPENAI_API_KEY"],
