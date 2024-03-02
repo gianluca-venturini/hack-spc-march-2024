@@ -1,7 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next/types';
 import OpenAI from 'openai';
-import { OpenAIStream, StreamingTextResponse } from 'ai'
-import { createClient, RedisClientType } from 'redis';
+import { OpenAIStream, StreamingTextResponse } from 'ai';
 import {NextResponse} from "next/server";
 
 const openai = new OpenAI({
@@ -16,42 +15,19 @@ const openai = new OpenAI({
 
 // Function to fetch questions from Redis
 async function fetchQuestions(): Promise<string[]> {
-  // Assuming questions are stored in a list called "questions"
-  // const questions = await redisClient.lRange("questions", 0, -1);
+    // Assuming questions are stored in a list called "questions"
+    // const questions = await redisClient.lRange("questions", 0, -1);
 
 
-  // questions is a list of questions
+    // questions is a list of questions
 
     let questions: string[] = [
-    "What is your name?",
-    "How old are you?",
-    "Where are you from?"
-];
-  return questions;
+        "What is your name?",
+        "How old are you?",
+        "Where are you from?"
+    ];
+    return questions;
 }
-
-
-// export async function testLLM() {
-
-//   try {
-//     // const transcription = await openai.com({
-//     //   model: "whisper-1",
-//     //   file: audioFile,
-//     // });
-//     console.log('starting generating response...');
-//     const stream = await openai.chat.completions.create({
-//         // model: 'gpt-4-turbo-preview',
-//         model: 'gpt-3.5-turbo-0125',
-//         messages: [{ role: 'user', content: 'Give me the first chapter of the divine commedy' }],
-//         stream: true,
-//     });
-//     console.log('done');
-
-//     return response.choices[0].message.content;
-//   } catch (error) {
-//     console.error("Error during transcription:", error);
-//   }
-// }
 
 export async function GET(request: Request) {
     const questions = await fetchQuestions();
@@ -67,7 +43,10 @@ export async function GET(request: Request) {
     const response = await openai.chat.completions.create({
         // model: 'gpt-4-turbo-preview',
         model: 'gpt-3.5-turbo-0125',
-        messages: [{ role: 'user', content: 'Summarize the following questions' + questions.join("\n") }],
+        messages: [
+            { role: 'system', content: 'Summarize the following questions' },
+            { role: 'user', content: questions.join("\n") }
+        ],
         stream: true,
     });
 
