@@ -5,7 +5,7 @@ import { setValue } from '../clients/redis';
 import { AVATAR_PREFIX } from '@/constants';
 
 interface IngestAvatar {
-    imageSignedURL: string;
+    avatarSignedURL: string;
 }
 
 export async function POST(request: Request) {
