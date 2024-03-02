@@ -3,16 +3,6 @@ import { QuestionsAggregated } from "./questions";
 import { testLLM } from "./server";
 import { redisClient } from "./api/clients/redis";
 
-async function setKey(key: string, value: string) {
-  await redisClient.set(key, value);
-  await redisClient.get(key);
-}
-
-async function setHash(hash: string, field: string, value: string) {
-  await redisClient.hset(hash, field, value);
-  await redisClient.hget(hash, field);
-}
-
 export default async function Home() {
   return (
     <main className="flex flex-col items-center justify-between p-24 h-screen">
