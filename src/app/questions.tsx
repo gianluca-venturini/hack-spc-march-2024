@@ -1,48 +1,84 @@
 'use client'
- 
-import { useEffect, useState } from 'react';
 
-interface Question {
-  text: string;
-}
- 
+import { NO_QUESTION_HEADER } from '@/constants';
+import { useEffect, useRef, useState } from 'react';
+
 export function QuestionsAggregated() {
-  const [questions, setQuestions] = useState<string>('');
+    const [questions, setQuestions] = useState<string[]>([]);
+    const hasFetched = useRef(false);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      setQuestions('');
-      try {
-        const response = await fetch('/api/question');
-        if (!response.body) {
-          throw new Error('ReadableStream not supported in this browser.');
+    const fetchNextQuestion = async () => {
+        try {
+            const response = await fetch('/api/question');
+            if (!response.body) {
+                throw new Error('ReadableStream not supported in this browser.');
+            }
+
+            if (!!response.headers.get(NO_QUESTION_HEADER)) {
+                // No new question
+                return;
+            }
+
+            const newQuestion: string = await response.text();
+            const decoder = new TextDecoder();
+
+            setQuestions(qs => ([...qs, newQuestion]));
+        } catch (error) {
+            console.error('Error fetching new question:', error);
         }
+    };
+    // const fetchNextQuestionStream = async () => {
+    //     try {
+    //         const response = await fetch('/api/question');
+    //         if (!response.body) {
+    //             throw new Error('ReadableStream not supported in this browser.');
+    //         }
 
-        const reader = response.body.getReader();
-        const decoder = new TextDecoder();
+    //         const reader = response.body.getReader();
+    //         const decoder = new TextDecoder();
 
-        reader.read().then(function processText({ done, value }) {
-          if (done) {
-            console.log('Stream complete');
-            return;
-          }
-          const chunk = decoder.decode(value, {stream: true});
-          setQuestions(prevQuestions => prevQuestions + chunk);
-          reader.read().then(processText);
-        });
-      } catch (error) {
-        console.error('There was a problem with your fetch operation:', error);
-      }
+    //         reader.read().then(function processText({ done, value }) {
+    //         if (done) {
+    //             console.log('Stream complete');
+    //             return;
+    //         }
+    //         const chunk = decoder.decode(value, {stream: true});
+    //             setQuestions(prevQuestions => prevQuestions + chunk);
+    //             reader.read().then(processText);
+    //         });
+    //     } catch (error) {
+    //         console.error('Error fetching new question:', error);
+    //     }
+    // };
+    const fetchQuestionsAsked = async () => {
+        try {
+            const response = await fetch('/api/questions_asked', { method: 'POST' });
+            const { questionsAsked }: { questionsAsked: [] } = await response.json();
+            console.log('questionsAsked', questionsAsked);
+            setQuestions(qs => ([...qs, ...questionsAsked]));
+        } catch (error) {
+            console.error('Error fetching questions asked:', error);
+        }
     };
 
-    fetchData();
-  }, []);
- 
-  return (
-    <div className="flex flex-col gap-4">
-      {questions.split('\n').map(q => (
-        <div key={q}>{q}</div>
-      ))}
-    </div>
-  )
+    useEffect(() => {
+        const initialFetch = async () => {
+            await fetchQuestionsAsked();
+            await fetchNextQuestion();
+
+            setInterval(fetchNextQuestion, 10_000);
+        };
+        if (!hasFetched.current) {
+            initialFetch();
+        }
+        hasFetched.current = true;
+    }, []);
+    
+    return (
+        <div className="flex flex-col gap-4">
+            {questions.map((q, i) => (
+                <div key={i}>{q}</div>
+            ))}
+        </div>
+    )
 }

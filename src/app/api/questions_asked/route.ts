@@ -13,11 +13,14 @@ async function fetchQuestionsAsked() {
   return { questionsAsked };
 }
 
-export async function GET(request: Request) {
+export async function POST(request: Request) {
     const { questionsAsked } = await fetchQuestionsAsked();
 
-    return new Response(JSON.stringify(questionsAsked), {
+    return new Response(JSON.stringify({ questionsAsked }), {
         status: 200,
+        headers: {
+          "Content-Type": "application/json",
+        },
     });
 
 }

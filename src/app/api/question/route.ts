@@ -29,10 +29,10 @@ export async function GET(request: Request) {
     console.log("Questions:", questions);
     console.log("Questions asked:", questionsAsked);
 
-    const NOOP_TOKEN = 'noop';
-
     const systemPrompt = `
-        You are summarizing the user questions from a crowd, only if they haven't been asked before, say "${NOOP_TOKEN}" otherwise.
+        You are summarizing the user questions from a crowd.
+        The response will be in json format \`{ question: '' }\`.
+        Only if you haven't asked this question before, ask it, otherwise return \`{ noop: true }\`.
         You want to use a friendly tone asking the shortest possible question.
         Ask the most popular question.
         ${questionsAsked.length > 0 ? `Don't repeat the following questions: \n${questionsAsked.map(q => `- ${q}`).join('\n')}` : ""}
@@ -40,8 +40,9 @@ export async function GET(request: Request) {
     console.log(systemPrompt);
 
     const response = await openaiClient.chat.completions.create({
-        // model: 'gpt-4-turbo-preview',
-        model: "gpt-3.5-turbo-0125",
+        model: 'gpt-4-turbo-preview',
+        // model: "gpt-3.5-turbo-0125",
+        response_format: { "type": "json_object" },
         messages: [
             {
                 role: "system",
@@ -53,9 +54,21 @@ export async function GET(request: Request) {
         stream: false,
     });
 
-    const newQuestion = response.choices[0].message.content;
+    const content = response.choices[0].message.content;
+    console.log('content', content);
 
-    if (newQuestion === NOOP_TOKEN) {
+    if (content === null) {
+        console.log('Content is null');
+        return new Response("", {
+            status: 200,
+            headers: {
+                [NO_QUESTION_HEADER]: "true",
+            },
+        });
+    }
+    const parsedContent = JSON.parse(content);
+
+    if (parsedContent.noop === true) {
         console.log('No new question');
         return new Response("", {
             status: 200,
@@ -64,6 +77,8 @@ export async function GET(request: Request) {
             },
         });
     }
+
+    const newQuestion = parsedContent.question;
 
     console.log('newQuestion:', newQuestion);
 
