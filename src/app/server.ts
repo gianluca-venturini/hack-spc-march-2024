@@ -17,8 +17,10 @@ export async function testLLM() {
     // });
     console.log('starting generating response...');
     const response = await openai.chat.completions.create({
-        model: 'gpt-4-turbo-preview',
-        messages: [{ role: 'user', content: 'Say this is a test' }],
+        // model: 'gpt-4-turbo-preview',
+        model: 'gpt-3.5-turbo-0125',
+        // messages: [{ role: 'user', content: 'Give me the first chapter of the divine commedy' }],
+        messages: [{ role: 'user', content: 'Say "test"' }],
         stream: false,
     });
     console.log('done');
