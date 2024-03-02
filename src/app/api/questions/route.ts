@@ -28,7 +28,7 @@ const openai = new OpenAI({
 //   }
 // }
 
-export async function GET(request: NextApiRequest, res: NextApiResponse) {
+export async function GET(request: Request) {
     const response = await openai.chat.completions.create({
         // model: 'gpt-4-turbo-preview',
         model: 'gpt-3.5-turbo-0125',
