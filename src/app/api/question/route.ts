@@ -2,6 +2,8 @@ import { NextApiRequest, NextApiResponse } from 'next/types';
 import OpenAI from 'openai';
 import { OpenAIStream, StreamingTextResponse } from 'ai';
 import {NextResponse} from "next/server";
+import { getValuesByPrefix } from '../clients/redis';
+import { NO_CONTENT_HEADER, QUESTION_PREFIX } from '@/constants';
 
 const openai = new OpenAI({
     apiKey: process.env['OPENAI_API_KEY']
@@ -21,11 +23,7 @@ async function fetchQuestions(): Promise<string[]> {
 
     // questions is a list of questions
 
-    let questions: string[] = [
-        "What is your name?",
-        "How old are you?",
-        "Where are you from?"
-    ];
+    let questions: string[] = await getValuesByPrefix(QUESTION_PREFIX);
     return questions;
 }
 
