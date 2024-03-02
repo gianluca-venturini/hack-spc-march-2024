@@ -5,7 +5,7 @@ import { setValue } from '../clients/redis';
 import { QUESTION_PREFIX } from '@/constants';
 
 interface IngestQuestion {
-    questionText: string;
+    text: string;
 }
 
 export async function POST(request: Request) {
