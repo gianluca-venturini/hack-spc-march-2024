@@ -1,20 +1,32 @@
 import Image from "next/image";
 import { QuestionsAggregated } from "./questions";
 import { testLLM } from "./server";
+import { redisClient } from "./api/clients/redis";
+
+async function setKey(key: string, value: string) {
+  await redisClient.set(key, value);
+  await redisClient.get(key);
+}
+
+async function setHash(hash: string, field: string, value: string) {
+  await redisClient.hset(hash, field, value);
+  await redisClient.hget(hash, field);
+}
 
 export default async function Home() {
-
   return (
     <main className="flex flex-col items-center justify-between p-24 h-screen">
       <div className="h-full flex flex-col items-center justify-between">
         <div className="relative flex flex-col justify-between gap-6 place-items-center before:absolute before:h-[300px] before:w-full sm:before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-full sm:after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 before:lg:h-[360px] z-[-1]">
-          <code className="font-mono font-bold"><QuestionsAggregated />{await testLLM()}</code>
+          <code className="font-mono font-bold">
+            <QuestionsAggregated />
+            {await testLLM()}
+          </code>
           Hello
         </div>
       </div>
 
-      <div className="mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:grid-cols-4 lg:text-left">
-      </div>
+      <div className="mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:grid-cols-4 lg:text-left"></div>
     </main>
   );
 }
