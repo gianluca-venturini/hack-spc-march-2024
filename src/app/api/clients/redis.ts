@@ -2,7 +2,7 @@ import Redis from "ioredis";
 
 export async function setValue(key: string, value: string) {
   await redisClient.set(key, value);
-  await redisClient.get(key);
+  return await redisClient.get(key);
 }
 
 export async function getValuesByPrefix(prefix: string): Promise<string[]> {
