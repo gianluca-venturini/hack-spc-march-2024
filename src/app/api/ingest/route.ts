@@ -3,6 +3,10 @@ import { uuid } from "uuidv4";
 import { setValue } from "../clients/redis";
 import { QUESTION_PREFIX } from "@/constants";
 
+export const runtime = "nodejs";
+export const preferredRegion = "sfo1";
+export const maxDuration = 300; // seconds
+
 interface IngestQuestion {
   questionText: string;
 }
