@@ -15,7 +15,12 @@ async function fetchQuestions() {
   return { questions, questionsAsked };
 }
 
-export async function GET(request: Request) {
+interface Params {
+    transcript: string;
+}
+
+export async function POST(request: Request) {
+    const requestData: Params = await request.json();
     const { questions, questionsAsked } = await fetchQuestions();
     if (questions.length === 0) {
         return new Response("", {
@@ -36,6 +41,8 @@ export async function GET(request: Request) {
         Ask the most popular question.
         If you don't have a new question, respond with \`{ noop: true }\`.
         ${questionsAsked.length > 0 ? `Ignore any question similar to: \n${questionsAsked.map(q => `- ${q}`).join('\n')}` : ""}
+
+        ${requestData.transcript ? `Ignore any question in this speech ${requestData.transcript}` : ''}
     `;
     console.log(systemPrompt);
 

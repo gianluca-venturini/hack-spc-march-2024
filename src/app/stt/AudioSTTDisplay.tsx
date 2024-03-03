@@ -1,15 +1,17 @@
 "use client";
 
-import { useState } from "react";
 import { AudioSTTControls } from "./AudioSTTControls";
 import React from "react";
 
-export default function AudioSTTDisplay() {
-  const [transcripts, setTranscripts] = useState<string[]>([]);
-
-  // TODO: do whatever you like with the transcripts
+export default function AudioSTTDisplay({
+  transcripts,
+  setTranscripts,
+}: {
+  transcripts: string[];
+  setTranscripts: (newTranscripts: string[]) => void;
+}) {
   const onReceiveTranscript = (text: string) => {
-    setTranscripts((prevTranscripts) => [text, ...prevTranscripts]);
+    setTranscripts([text, ...transcripts]);
   };
 
   return (
