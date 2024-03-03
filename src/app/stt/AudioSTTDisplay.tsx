@@ -9,7 +9,7 @@ export default function AudioSTTDisplay() {
 
   // TODO: do whatever you like with the transcripts
   const onReceiveTranscript = (text: string) => {
-    setTranscripts((prevTranscripts) => [...prevTranscripts, text]);
+    setTranscripts((prevTranscripts) => [text, ...prevTranscripts]);
   };
 
   return (
