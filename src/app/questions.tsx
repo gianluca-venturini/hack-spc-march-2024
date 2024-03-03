@@ -83,7 +83,12 @@ export function QuestionsAggregated() {
                         ))}
                 </div>
             </code>
-            <button onClick={fetchNextQuestion}>Next Question</button>
+            <button
+                className="h-32 w-32 bg-red-500 hover:bg-red-600 text-white px-4 rounded-full p-6"
+                onClick={fetchNextQuestion}
+            >
+                Next Question
+            </button>
         </div>
     )
 }
