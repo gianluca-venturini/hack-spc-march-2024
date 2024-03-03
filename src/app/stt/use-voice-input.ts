@@ -2,6 +2,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import hark from "hark";
 import { useMicrophone } from "./use-microphone";
 
+const VOLUME_THRESHOLD = "-25dB";
+const AUDIO_SAMPLERATE = 44100;
 export const MIME_TYPE = "audio/webm";
 
 interface UseVoiceInputProps {
@@ -24,7 +26,7 @@ export const useVoiceInput = ({
   const blobArrayRef = useRef<Blob[]>([]);
   const harkerRef = useRef<hark.Harker | null>(null);
 
-  const [detectedSpeech, setDetectedSpeech] = useState(false);
+  // const [detectedSpeech, setDetectedSpeech] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [isDisabled, setIsDisabled] = useState(false);
 
@@ -54,31 +56,34 @@ export const useVoiceInput = ({
     // If there's no speech detected, we shouldn't send the audio to the backend.
     const harker = hark(microphone);
     harker.on("speaking", () => {
-      setDetectedSpeech(true);
-      blobArrayRef.current = []; // Reset the blob array for a new sentence
+      console.log(">>> SPEAKING");
+      // setDetectedSpeech(true);
+      // blobArrayRef.current = []; // Reset the blob array for a new sentence
     });
     harker.on("stopped_speaking", () => {
+      console.log(">>> STOPPED SPEAKING");
       processAudio(); // Process the recorded audio when the speaker stops
     });
     harkerRef.current = harker;
 
     const recorderOptions = {
-      mimeType: MIME_TYPE,
+      type: "audio",
+      sampleRate: AUDIO_SAMPLERATE,
+      mimeType: "audio/webm",
+      threshold: VOLUME_THRESHOLD,
     };
 
     const recorder = new MediaRecorder(microphone, recorderOptions);
     recorderRef.current = recorder;
 
     recorder.ondataavailable = (event: BlobEvent) => {
+      console.log(">>> ON DATA AVAILABLE");
       if (event.data.size > 0) {
         blobArrayRef.current.push(event.data);
       }
     };
 
-    // Using timeSlice is necessary for this to work on Safari and iOS.
-    // While you can get audio/mp4 blobs without timeSlice, whisper cannot
-    // process them.
-    recorder.start(1000);
+    recorder.start();
     setIsRecording(true);
 
     return true;
@@ -96,7 +101,7 @@ export const useVoiceInput = ({
 
     setIsRecording(false);
     setIsDisabled(false);
-    setDetectedSpeech(false);
+    // setDetectedSpeech(false);
     releaseMicrophone();
   }, [releaseMicrophone]);
 
