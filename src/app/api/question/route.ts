@@ -39,11 +39,9 @@ You are summarizing the user questions from the crowd attending a talk.
 The response will be in json format \`{ questions: [{ question: string, exclude: boolean }] }\`.
 You want to use a friendly tone asking simple short questions. Summarize similar questions in a single question. Ask the most popular not answered and not asked questions first. Don't ask too many questions at once.
 ===========
-Flag all the questions with \`exclude: true\` already asked or mentioned in the following text:
+Don't ask any of the following questions:
 \`\`\`
 ${questionsAsked.map(q => `- ${q}`).join('\n')}
-
-${requestData.transcript ?? ''}
 \`\`\`
 ===========
 Next the user questions:
@@ -79,7 +77,7 @@ Next the user questions:
     }
     const parsedContent: { questions: [{ question: string; exclude: boolean}]} = JSON.parse(content);
 
-    if (parsedContent.questions.filter(q => q.exclude === false).length === 0) {
+    if (!parsedContent.questions || parsedContent.questions.filter(q => q.exclude === false).length === 0) {
         console.log('No new question');
         return new Response("", {
             status: 200,

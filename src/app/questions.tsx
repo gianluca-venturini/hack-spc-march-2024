@@ -27,7 +27,9 @@ export function QuestionsAggregated(props: { transcripts: string[]; isProcessing
             method: "POST",
             body: JSON.stringify({ 
                 // Only send last 100 words
-                transcript: props.transcripts.join(" -- ").split(' ').slice(-100).join(' ')
+                // transcript: props.transcripts.join(" -- ").split(' ').slice(-100).join(' ')
+                // TODO: enable later
+                transcript: ''
             }),
         });
         if (!response.body) {
@@ -46,7 +48,7 @@ export function QuestionsAggregated(props: { transcripts: string[]; isProcessing
         } catch (error) {
             console.error("Error fetching new question:", error);
         }
-    }, [props.transcripts]);
+    }, []);
 
     const computeAnsweredQuestions = useCallback(async () => {
         console.log('computeAnsweredQuestions', questions, answeredQuestions);
@@ -55,7 +57,7 @@ export function QuestionsAggregated(props: { transcripts: string[]; isProcessing
             try {
             const response = await fetch("/api/answered", {
                 method: "POST",
-                body: JSON.stringify({ transcript: props.transcripts.join(" -- "), question }),
+                body: JSON.stringify({ transcript: props.transcripts.join(" -- ").split(' ').slice(-200).join(' '), question }),
             });
         
             if (!!response.headers.get(NO_CONTENT_HEADER)) {
@@ -86,14 +88,10 @@ export function QuestionsAggregated(props: { transcripts: string[]; isProcessing
     }, []);
 
     useEffect(() => {
-        let interval: NodeJS.Timeout;
+        let interval1: NodeJS.Timeout;
         if (props.isProcessing) {
-            interval = setInterval(async () => {
+            interval1 = setInterval(async () => {
                 await computeAnsweredQuestions();
-                if (computeNotAnsweredQuestions(questions, answeredQuestions).length <= 3) {
-                    console.log('fetchNextQuestion');
-                    await fetchNextQuestion();
-                }
             }, 3_000);
         }
         const initialFetch = async () => {
@@ -104,8 +102,26 @@ export function QuestionsAggregated(props: { transcripts: string[]; isProcessing
             initialFetch();
         }
         hasFetched.current = true;
-        return () => clearInterval(interval);
+        return () => {
+            clearInterval(interval1);
+        };
     }, [computeAnsweredQuestions, fetchNextQuestion, fetchQuestionsAsked, questions, answeredQuestions, props.isProcessing]);
+
+    useEffect(() => {
+        let interval2: NodeJS.Timeout;
+        console.log('resetting interval2');
+        if (props.isProcessing) {
+            interval2 = setInterval(async () => {
+                if (computeNotAnsweredQuestions(questions, answeredQuestions).length <= 3) {
+                    console.log('fetchNextQuestion', computeNotAnsweredQuestions(questions, answeredQuestions).length);
+                    await fetchNextQuestion();
+                }
+            }, 10_000);
+        }
+        return () => {
+            clearInterval(interval2);
+        };
+    }, [fetchNextQuestion, questions, answeredQuestions, props.isProcessing]);
 
 return (
     <div className="space-y-4">
