@@ -37,14 +37,12 @@ export async function POST(request: Request) {
     const systemPrompt = `
 You are summarizing the user questions from the crowd attending a talk.
 The response will be in json format \`{ questions: [{ question: string, exclude: boolean }] }\`.
-You want to use a friendly tone asking simple short questions. Summarize as many user questions as possible in a single question. Ask the most popular not answered and not asked questions first. Don't ask too many questions at once.
+You want to use a friendly tone asking simple short questions. Summarize similar questions in a single question. Ask the most popular not answered and not asked questions first. Don't ask too many questions at once.
 ===========
-Flag all the questions with \`exclude: true\` already asked or answered in the talk:
+Flag all the questions with \`exclude: true\` already mentioned in the following text:
 \`\`\`
 ${questionsAsked.map(q => `- ${q}`).join('\n')}
-\`\`\`
-===========
-\`\`\`
+
 ${requestData.transcript ?? ''}
 \`\`\`
 ===========
@@ -79,9 +77,9 @@ Next the user questions:
             },
         });
     }
-    const parsedContent = JSON.parse(content);
+    const parsedContent: { questions: [{ question: string; exclude: boolean}]} = JSON.parse(content);
 
-    if (parsedContent.noop === true) {
+    if (parsedContent.questions.filter(q => q.exclude === true).length === 0) {
         console.log('No new question');
         return new Response("", {
             status: 200,
@@ -91,7 +89,17 @@ Next the user questions:
         });
     }
 
-    const newQuestion = parsedContent.question;
+    const newQuestion = parsedContent.questions.find(q => q.exclude === false)?.question;
+
+    if (newQuestion === null || newQuestion === undefined) {
+        console.log('New question is null?');
+        return new Response("", {
+            status: 200,
+            headers: {
+                [NO_QUESTION_HEADER]: "true",
+            },
+        });
+    }
 
     console.log('newQuestion:', newQuestion);
 
