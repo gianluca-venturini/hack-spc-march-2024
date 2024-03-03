@@ -116,13 +116,13 @@ return (
         </div>
         <div className="flex space-x-4">
             <button
-                className="h-12 px-6 text-white rounded-full shadow-lg transition-all duration-150 ease-in-out transform hover:-translate-y-1 bg-gradient-to-r from-blue-500 to-teal-400 hover:from-blue-600 hover:to-teal-500 focus:outline-none focus:ring-4 focus:ring-blue-300"
+                className="text-xs h-8 px-6 text-white rounded-full shadow-lg transition-all duration-150 ease-in-out transform hover:-translate-y-1 bg-gradient-to-r from-blue-500 to-teal-400 hover:from-blue-600 hover:to-teal-500 focus:outline-none focus:ring-4 focus:ring-blue-300"
                 onClick={fetchNextQuestion}
             >
                 Next
             </button>
             <button
-                className="h-12 px-6 text-white rounded-full shadow-lg transition-all duration-150 ease-in-out transform hover:-translate-y-1 bg-gradient-to-r from-green-500 to-lime-400 hover:from-green-600 hover:to-lime-500 focus:outline-none focus:ring-4 focus:ring-green-300"
+                className="text-xs h-8 px-6 text-white rounded-full shadow-lg transition-all duration-150 ease-in-out transform hover:-translate-y-1 bg-gradient-to-r from-green-500 to-lime-400 hover:from-green-600 hover:to-lime-500 focus:outline-none focus:ring-4 focus:ring-green-300"
                 onClick={computeAnsweredQuestions}
             >
                 Check

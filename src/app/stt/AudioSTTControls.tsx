@@ -3,6 +3,7 @@
 import React, { useCallback, useState } from "react";
 import { nanoid } from "ai";
 import { useVoiceInput } from "./use-voice-input";
+import { ButtonWow } from "../ButtonWow";
 
 export function AudioSTTControls({
     onSubmitTranscript,
@@ -44,28 +45,23 @@ export function AudioSTTControls({
     <div
       className={isRecording ? "relative text-right" : "relative text-center"}
     >
-      <>
-        {isAvailable && (
-          <button
-            className={
-              isRecording
-                ? "h-16 w-16 text-sm bg-red-500 hover:bg-red-600 text-white px-4 rounded-full"
-                : "h-32 w-32 text-lg bg-green-500 hover:bg-green-600 text-white px-4 rounded-full p-6"
-            }
-            onClick={() => { 
-              if (isRecording) { 
-                stopRecording();
-                setIsProcessing(false);
-            } else { 
-                startRecording();
-                setIsProcessing(true);
-            }}}
-            disabled={false}
-          >
-            {isRecording ? "Stop" : "Start"}
-          </button>
-        )}
-      </>
+        <>
+            {isAvailable && (
+                <ButtonWow 
+                    isAnimating={isRecording}
+                    value={isRecording ? "End" : "Present"} 
+                    onClick={() => { 
+                        if (isRecording) { 
+                            stopRecording();
+                            setIsProcessing(false);
+                        } else { 
+                            startRecording();
+                            setIsProcessing(true);
+                        }}
+                    } 
+                />
+            )}
+        </>
     </div>
   );
 }
