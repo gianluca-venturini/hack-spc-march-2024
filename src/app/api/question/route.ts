@@ -120,6 +120,17 @@ ${questionsAsked.map(q => `- ${q}`).join('\n')}
     });
 
     const content2 = response2.choices[0].message.content;
+
+    if (content2 === null) {
+        console.log('Content is null');
+        return new Response("", {
+            status: 200,
+            headers: {
+                [NO_QUESTION_HEADER]: "true",
+            },
+        });
+    }
+
     const parsedContent2: { questions: [{ question: string, answered: boolean }]} = JSON.parse(content2);
     console.log('parsedContent2', parsedContent2);
 
