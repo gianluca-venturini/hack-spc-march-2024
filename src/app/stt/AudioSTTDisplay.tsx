@@ -5,17 +5,21 @@ import { AudioSTTControls } from "./AudioSTTControls";
 import React from "react";
 
 export default function AudioSTTDisplay() {
-  const [transcript, setTranscript] = useState<string | null>(null);
+  const [transcripts, setTranscripts] = useState<string[]>([]);
 
-  // TODO: do whatever you like with the transcript
+  // TODO: do whatever you like with the transcripts
   const onReceiveTranscript = (text: string) => {
-    setTranscript(text);
+    setTranscripts((prevTranscripts) => [...prevTranscripts, text]);
   };
 
   return (
     <div>
       <AudioSTTControls onSubmitTranscript={onReceiveTranscript} />
-      <div className="mt-4">{transcript}</div>
+      <div className="mt-4 space-y-4">
+        {transcripts.map((transcript, index) => (
+          <div key={index}>{transcript}</div>
+        ))}
+      </div>
     </div>
   );
 }

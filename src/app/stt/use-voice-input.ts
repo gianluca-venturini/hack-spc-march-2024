@@ -2,8 +2,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import hark from "hark";
 import { useMicrophone } from "./use-microphone";
 
-const VOLUME_THRESHOLD = "-25dB";
-const AUDIO_SAMPLERATE = 44100;
 export const MIME_TYPE = "audio/webm";
 
 interface UseVoiceInputProps {
@@ -33,10 +31,14 @@ export const useVoiceInput = ({
   const { acquireMicrophone, releaseMicrophone, hasMicrophone } =
     useMicrophone();
 
-  /**
-   * Start recording audio from the microphone. We'll accumulate a buffer of all audio
-   * recorder up until stopRecording is called.
-   */
+  const processAudio = useCallback(() => {
+    let combinedBlob = new Blob(blobArrayRef.current, {
+      type: MIME_TYPE,
+    });
+    onAudioData(combinedBlob, MIME_TYPE);
+    blobArrayRef.current = []; // Clear the array for the next recording segment
+  }, [onAudioData]);
+
   const startRecording = useCallback(async () => {
     setIsDisabled(true);
     const microphone = await acquireMicrophone();
@@ -51,20 +53,23 @@ export const useVoiceInput = ({
     // Set up harker to detect speech.
     // If there's no speech detected, we shouldn't send the audio to the backend.
     const harker = hark(microphone);
-    harker.on("speaking", () => setDetectedSpeech(true));
+    harker.on("speaking", () => {
+      setDetectedSpeech(true);
+      blobArrayRef.current = []; // Reset the blob array for a new sentence
+    });
+    harker.on("stopped_speaking", () => {
+      processAudio(); // Process the recorded audio when the speaker stops
+    });
     harkerRef.current = harker;
 
     const recorderOptions = {
-      type: "audio",
-      sampleRate: AUDIO_SAMPLERATE,
-      mimeType: "audio/webm",
-      threshold: VOLUME_THRESHOLD,
+      mimeType: MIME_TYPE,
     };
 
     const recorder = new MediaRecorder(microphone, recorderOptions);
     recorderRef.current = recorder;
 
-    recorderRef.current.ondataavailable = (event: BlobEvent) => {
+    recorder.ondataavailable = (event: BlobEvent) => {
       if (event.data.size > 0) {
         blobArrayRef.current.push(event.data);
       }
@@ -77,19 +82,12 @@ export const useVoiceInput = ({
     setIsRecording(true);
 
     return true;
-  }, [acquireMicrophone, MIME_TYPE]);
+  }, [acquireMicrophone, processAudio]);
 
-  /**
-   * Tear down harker, recorder and release microphone
-   */
-  const cleanup = useCallback(async () => {
-    if (harkerRef.current) {
-      // @ts-ignore
-      harkerRef.current?.off("speaking");
-      harkerRef.current?.stop();
-      harkerRef.current = null;
-      setDetectedSpeech(false);
-    }
+  const cleanup = useCallback(() => {
+    harkerRef.current?.stop();
+    harkerRef.current = null;
+
     if (recorderRef.current) {
       recorderRef.current.ondataavailable = null;
       recorderRef.current.stop();
@@ -98,41 +96,10 @@ export const useVoiceInput = ({
 
     setIsRecording(false);
     setIsDisabled(false);
+    setDetectedSpeech(false);
     releaseMicrophone();
   }, [releaseMicrophone]);
 
-  /**
-   * Stop recording, release/cleanup all resources, and emit the audio blob.
-   */
-  const stopRecording = useCallback(() => {
-    if (!detectedSpeech) {
-      console.log("Sorry, I didn't hear any speech. Please try again.");
-      cleanup();
-      return;
-    }
-
-    if (recorderRef.current) {
-      setIsDisabled(true);
-
-      recorderRef.current.ondataavailable = (event: BlobEvent) => {
-        if (event.data.size > 0) {
-          blobArrayRef.current.push(event.data);
-        }
-        let combinedBlob = new Blob(blobArrayRef.current, {
-          type: MIME_TYPE,
-        });
-        onAudioData(combinedBlob, MIME_TYPE);
-        blobArrayRef.current = [];
-        cleanup();
-      };
-
-      recorderRef.current.stop();
-    }
-  }, [MIME_TYPE, detectedSpeech, cleanup, onAudioData]);
-
-  /**
-   * Cleanup on component dismount
-   */
   useEffect(() => {
     return () => {
       cleanup();
@@ -145,6 +112,6 @@ export const useVoiceInput = ({
     isDisabled,
     hasMicrophone,
     startRecording,
-    stopRecording,
+    stopRecording: cleanup,
   };
 };
