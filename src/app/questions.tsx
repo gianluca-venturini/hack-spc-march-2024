@@ -25,7 +25,10 @@ export function QuestionsAggregated(props: { transcripts: string[]; isProcessing
         try {
         const response = await fetch("/api/question", {
             method: "POST",
-            body: JSON.stringify({ transcript: props.transcripts.join(" -- ") }),
+            body: JSON.stringify({ 
+                // Only send last 100 words
+                transcript: props.transcripts.join(" -- ").split(' ').slice(-100).join(' ')
+            }),
         });
         if (!response.body) {
             throw new Error("ReadableStream not supported in this browser.");
