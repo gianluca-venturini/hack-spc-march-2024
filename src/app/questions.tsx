@@ -106,6 +106,23 @@ export function QuestionsAggregated(props: { transcripts: string[]; isProcessing
 
 return (
     <div className="space-y-4">
+        <img src="/ask.png" alt="ask" style={{ 
+            zIndex: 1000,
+            position: 'absolute', 
+            height: 300, 
+            width: 300, 
+            top: '40%', 
+            right: '50%', 
+            transform: 'translate(50%,-50%)',
+            transition: 'all 1s ease-in-out',
+            ...(questions.length > 0 ? { 
+                top: '20px', 
+                right: '20px', 
+                transform: 'translate(0,0)',
+                height: 100, 
+                width: 100, 
+            } : {}),
+        }} />
         <div className="flex space-x-4">
             <button
                 className="border border-white text-white bg-transparent text-xs h-8 px-6 text-white rounded-full shadow-lg transition-all duration-150 ease-in-out transform hover:-translate-y-1 focus:outline-none focus:ring-4"
