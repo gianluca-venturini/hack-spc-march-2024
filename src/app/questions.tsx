@@ -9,6 +9,17 @@ export function QuestionsAggregated(props: { transcripts: string[]; isProcessing
     const [answeredQuestions, setAnsweredQuestions] = useState<Set<string>>(new Set());
     const hasFetched = useRef(false);
 
+    function animateOutAnsweredQuestions(q: string) {
+        setAnsweredQuestions(s => {
+            const newAnsweredQuestions = new Set(s);
+            newAnsweredQuestions.add(q);
+            return newAnsweredQuestions;
+        });
+        setTimeout(() => {
+            setQuestions(qs => qs.filter(question => question !== q));
+        }, 5000);
+    }
+
     const fetchNextQuestion = useCallback(async () => {
         console.log('Getting new question');
         try {
@@ -52,11 +63,7 @@ export function QuestionsAggregated(props: { transcripts: string[]; isProcessing
             const { answered }: { answered: boolean } = await response.json();
             if (answered) {
                 console.log("Question has been answered:", question);
-                setAnsweredQuestions(s => {
-                    const newAnsweredQuestions = new Set(s);
-                    newAnsweredQuestions.add(question);
-                    return newAnsweredQuestions;
-                });
+                animateOutAnsweredQuestions(question);
             }
             } catch (error) {
                 console.error("Error setting a question as answered:", error);
@@ -99,15 +106,18 @@ export function QuestionsAggregated(props: { transcripts: string[]; isProcessing
 
 return (
     <div className="space-y-4">
-        <div className="p-4 bg-white rounded-lg shadow-lg">
+        <div>
             <div className="flex flex-col gap-2">
             {questions.map((q, i) => (
                 <div
-                key={i}
-                className={`p-3 rounded-md transition-all duration-500 ease-in-out transform ${
-                    answeredQuestions.has(q) ? 'bg-green-100 text-green-800' : 'bg-gray-50 text-gray-800'
-                } shadow hover:shadow-md`}
-                style={{ textDecoration: answeredQuestions.has(q) ? 'line-through' : '' }}
+                    key={`${q}-${i}`}
+                    className={`p-3 rounded-md transition-all duration-500 ease-in-out transform ${
+                        answeredQuestions.has(q) ? 'bg-green-100 text-green-800' : 'bg-gray-50 text-gray-800'
+                    } shadow hover:shadow-md`}
+                    style={{ textDecoration: answeredQuestions.has(q) ? 'line-through' : '', opacity: answeredQuestions.has(q) ? 0 : 1, transition: 'opacity 5s ease-in-out'}}
+                    onClick={() => {
+                        animateOutAnsweredQuestions(q);
+                    }}
                 >
                 <span className={`block text-sm font-medium transition-opacity duration-300 ${answeredQuestions.has(q) ? 'opacity-50' : 'opacity-100'}`}>{q}</span>
                 </div>
