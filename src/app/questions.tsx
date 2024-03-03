@@ -1,7 +1,7 @@
 "use client";
 
 import { NO_CONTENT_HEADER, NO_QUESTION_HEADER } from "@/constants";
-import React from "react";
+import React, { useCallback } from "react";
 import { useEffect, useRef, useState } from "react";
 
 export function QuestionsAggregated(props: { transcripts: string[] }) {
@@ -9,7 +9,7 @@ export function QuestionsAggregated(props: { transcripts: string[] }) {
   const [answeredQuestions, setAnsweredQuestions] = useState<Set<string>>(new Set());
   const hasFetched = useRef(false);
 
-    const fetchNextQuestion = async () => {
+    const fetchNextQuestion = useCallback(async () => {
         console.log('Getting new question');
         try {
         const response = await fetch("/api/question", {
@@ -20,7 +20,7 @@ export function QuestionsAggregated(props: { transcripts: string[] }) {
             throw new Error("ReadableStream not supported in this browser.");
         }
 
-        if (!!response.headers.get(NO_QUESTION_HEADER)) {
+        if (!!response.headers.get(NO_QUESTION_HEADER) || !!response.headers.get(NO_CONTENT_HEADER)) {
             // No new question
             return;
         }
@@ -32,9 +32,10 @@ export function QuestionsAggregated(props: { transcripts: string[] }) {
         } catch (error) {
             console.error("Error fetching new question:", error);
         }
-    };
+    }, [props.transcripts]);
 
-    const computeAnsweredQuestions = async () => {
+    const computeAnsweredQuestions = useCallback(async () => {
+        console.log('computeAnsweredQuestions', questions, answeredQuestions);
         const notAnsweredQuestions = computeNotAnsweredQuestions(questions, answeredQuestions);
         for (const question of notAnsweredQuestions) {
             try {
@@ -61,85 +62,63 @@ export function QuestionsAggregated(props: { transcripts: string[] }) {
                 console.error("Error setting a question as answered:", error);
             }
         }
-    };
-  // const fetchNextQuestionStream = async () => {
-  //     try {
-  //         const response = await fetch('/api/question');
-  //         if (!response.body) {
-  //             throw new Error('ReadableStream not supported in this browser.');
-  //         }
+    }, [answeredQuestions, props.transcripts, questions]);
 
-  //         const reader = response.body.getReader();
-  //         const decoder = new TextDecoder();
+    const fetchQuestionsAsked = useCallback(async () => {
+            try {
+                const response = await fetch("/api/questions_asked", { method: "POST" });
+                const { questionsAsked }: { questionsAsked: [] } = await response.json();
+                console.log("questionsAsked", questionsAsked);
+                setQuestions((qs) => [...qs, ...questionsAsked]);
+            } catch (error) {
+                console.error("Error fetching questions asked:", error);
+            }
+    }, []);
 
-  //         reader.read().then(function processText({ done, value }) {
-  //         if (done) {
-  //             console.log('Stream complete');
-  //             return;
-  //         }
-  //         const chunk = decoder.decode(value, {stream: true});
-  //             setQuestions(prevQuestions => prevQuestions + chunk);
-  //             reader.read().then(processText);
-  //         });
-  //     } catch (error) {
-  //         console.error('Error fetching new question:', error);
-  //     }
-  // };
-  const fetchQuestionsAsked = async () => {
-    try {
-      const response = await fetch("/api/questions_asked", { method: "POST" });
-      const { questionsAsked }: { questionsAsked: [] } = await response.json();
-      console.log("questionsAsked", questionsAsked);
-      setQuestions((qs) => [...qs, ...questionsAsked]);
-    } catch (error) {
-      console.error("Error fetching questions asked:", error);
-    }
-  };
-
-  useEffect(() => {
-    const initialFetch = async () => {
-        await fetchQuestionsAsked();
-
-        setInterval(async () => {
+    useEffect(() => {
+        const interval = setInterval(async () => {
             await computeAnsweredQuestions();
             if (computeNotAnsweredQuestions(questions, answeredQuestions).length <= 3) {
+                console.log('fetchNextQuestion');
                 await fetchNextQuestion();
             }
-        }, 10_000);
-    };
-    if (!hasFetched.current) {
-      initialFetch();
-    }
-    hasFetched.current = true;
-  }, []);
+        }, 3_000);
+        const initialFetch = async () => {
+            await fetchQuestionsAsked();
 
-  console.log('answeredQuestions', answeredQuestions);
+        };
+        if (!hasFetched.current) {
+            initialFetch();
+        }
+        hasFetched.current = true;
+        return () => clearInterval(interval);
+    }, [computeAnsweredQuestions, fetchNextQuestion, fetchQuestionsAsked, questions, answeredQuestions]);
 
-  return (
-    <div>
-      <code className="font-mono font-bold">
-        <div className="flex flex-col gap-4">
-          {questions.map((q, i) => (
-            <div key={i} style={{ textDecoration: answeredQuestions.has(q) ? 'line-through' : '' }}>{q}</div>
-          ))}
+    return (
+        <div>
+            <code className="font-mono font-bold">
+                <div className="flex flex-col gap-4">
+                {questions.map((q, i) => (
+                    <div key={i} style={{ textDecoration: answeredQuestions.has(q) ? 'line-through' : '' }}>{q}</div>
+                ))}
+                </div>
+            </code>
+            <button
+                className="h-20 w-20 bg-red-500 hover:bg-red-600 text-white px-4 rounded-full p-6"
+                onClick={fetchNextQuestion}
+            >
+                Next
+            </button>
+            <button
+                className="h-20 w-20 bg-red-500 hover:bg-red-600 text-white px-4 rounded-full p-6"
+                onClick={computeAnsweredQuestions}
+            >
+                Check
+            </button>
         </div>
-      </code>
-      <button
-        className="h-20 w-20 bg-red-500 hover:bg-red-600 text-white px-4 rounded-full p-6"
-        onClick={fetchNextQuestion}
-      >
-        Next
-      </button>
-      <button
-        className="h-20 w-20 bg-red-500 hover:bg-red-600 text-white px-4 rounded-full p-6"
-        onClick={computeAnsweredQuestions}
-      >
-        Check
-      </button>
-    </div>
-  );
+    );
 }
 
 function computeNotAnsweredQuestions(questions: string[], answeredQuestions: Set<string>) {
-  return questions.filter(q => !answeredQuestions.has(q));
+    return questions.filter(q => !answeredQuestions.has(q));
 }
