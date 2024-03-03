@@ -36,15 +36,25 @@ export async function POST(request: Request) {
 
     const systemPrompt = `
 You are summarizing the user questions from the crowd attending a talk.
-The response will be in json format \`{ questions: [{ question: string, exclude: boolean }] }\`.
-You want to use a friendly tone asking simple short questions. Summarize similar questions in a single question. Ask the most popular not answered and not asked questions first. Don't ask too many questions at once.
+The response will be in json format \`{ questions: [{ question: string }] }\`.
+The questions should be posed in question form ending with a question mark.
+You want to use a friendly tone asking simple short questions. Summarize similar questions in a single question.
+Ask the most popular questions first. Don't ask too many questions at once.
+
+For example, with the following questions:
+- What is your favorite car?
+- What is your favorite car brand?
+- What is your favorite automobile brand and model?
+
+You should output:
+{ questions: [{ question: 'What is your favorite brand and model of car?' }] }
+
 ===========
-Don't ask any of the following questions:
+Don't ask anything contained in the following questions:
 \`\`\`
 ${questionsAsked.map(q => `- ${q}`).join('\n')}
 \`\`\`
 ===========
-Next the user questions:
 `;
     console.log('systemPrompt\n', systemPrompt);
     console.log('questions\n', questions.join("\n"));
@@ -58,7 +68,7 @@ Next the user questions:
                 role: "system",
                 content: systemPrompt,
             },
-            { role: "user" as const, content: questions.join("\n") },
+            { role: "user" as const, content: 'Here the user questions:\n' + questions.join("\n") },
         ],
         stream: false,
     });
@@ -75,10 +85,10 @@ Next the user questions:
             },
         });
     }
-    const parsedContent: { questions: [{ question: string; exclude: boolean}]} = JSON.parse(content);
+    const parsedContent: { questions: [{ question: string }]} = JSON.parse(content);
 
-    if (!parsedContent.questions || parsedContent.questions.filter(q => q.exclude === false).length === 0) {
-        console.log('No new question');
+    if (!parsedContent.questions) {
+        console.log('No question');
         return new Response("", {
             status: 200,
             headers: {
@@ -87,7 +97,43 @@ Next the user questions:
         });
     }
 
-    const newQuestion = parsedContent.questions.find(q => q.exclude === false)?.question;
+    const response2 = await openaiClient.chat.completions.create({
+        model: 'gpt-4-turbo-preview',
+        // model: "gpt-3.5-turbo-0125",
+        response_format: { "type": "json_object" },
+        messages: [
+            {
+                role: "system",
+                content: `
+Determine if a question has been asked before and output in the JSON in the format \`{ questions: [{ question: string, answered: boolean }] }\`
+You should respond with \`{ questions: [{ question: 'question1', answered: true }] }\` if a similar question has been asked before.
+You should respond with \`{ questions: [{ question: 'question1', answered: false }] }\` if it has been NEVER been asked before.
+These are the questions that have been asked:
+\`\`\`
+${questionsAsked.map(q => `- ${q}`).join('\n')}
+\`\`\`
+                `,
+            },
+            { role: "user" as const, content: 'Here the questions:\n' + parsedContent.questions.map(q => q.question).join("\n") },
+        ],
+        stream: false,
+    });
+
+    const content2 = response2.choices[0].message.content;
+    const parsedContent2: { questions: [{ question: string, answered: boolean }]} = JSON.parse(content2);
+    console.log('parsedContent2', parsedContent2);
+
+    if (!parsedContent2.questions) {
+        console.log('No new question -- all asked before');
+        return new Response("", {
+            status: 200,
+            headers: {
+                [NO_QUESTION_HEADER]: "true",
+            },
+        });
+    }
+
+    const newQuestion = parsedContent2.questions.find(q => !q.answered === true)?.question;
 
     if (newQuestion === null || newQuestion === undefined) {
         console.log('New question is null?');

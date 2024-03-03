@@ -112,7 +112,7 @@ export function QuestionsAggregated(props: { transcripts: string[]; isProcessing
         console.log('resetting interval2');
         if (props.isProcessing) {
             interval2 = setInterval(async () => {
-                if (computeNotAnsweredQuestions(questions, answeredQuestions).length <= 3) {
+                if (computeNotAnsweredQuestions(questions, answeredQuestions).length < 3) {
                     console.log('fetchNextQuestion', computeNotAnsweredQuestions(questions, answeredQuestions).length);
                     await fetchNextQuestion();
                 }
