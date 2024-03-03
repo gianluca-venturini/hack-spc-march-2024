@@ -31,6 +31,10 @@ You are trying to understand if a topic has been mentioned by the user.
 Partial answers or mentions are fine.
 Respond in JSON with \`{ answered: true }\` if something about the question has been mentioned.
 Respond in JSON  with \`{ answered: false }\` if something about the question has NOT been mentioned.
+
+For example if the transcript contains "...Italy won the championship in 2006..."
+Answers "When the italic country won the world cup?"
+
 Here the text:
 ${requestData.transcript}
 `;
