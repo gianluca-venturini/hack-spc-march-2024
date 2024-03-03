@@ -3,13 +3,13 @@
 import { NO_QUESTION_HEADER } from '@/constants';
 import { useEffect, useRef, useState } from 'react';
 
-export function QuestionsAggregated() {
+export function QuestionsAggregated(props: { transcript: string | null }) {
     const [questions, setQuestions] = useState<string[]>([]);
     const hasFetched = useRef(false);
 
     const fetchNextQuestion = async () => {
         try {
-            const response = await fetch('/api/question');
+            const response = await fetch('/api/question', { method: 'POST', body: JSON.stringify({ transcript: props.transcript })});
             if (!response.body) {
                 throw new Error('ReadableStream not supported in this browser.');
             }
