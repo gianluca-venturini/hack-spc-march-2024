@@ -39,7 +39,7 @@ You are summarizing the user questions from the crowd attending a talk.
 The response will be in json format \`{ questions: [{ question: string, exclude: boolean }] }\`.
 You want to use a friendly tone asking simple short questions. Summarize similar questions in a single question. Ask the most popular not answered and not asked questions first. Don't ask too many questions at once.
 ===========
-Flag all the questions with \`exclude: true\` already mentioned in the following text:
+Flag all the questions with \`exclude: true\` already asked or mentioned in the following text:
 \`\`\`
 ${questionsAsked.map(q => `- ${q}`).join('\n')}
 
