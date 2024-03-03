@@ -1,4 +1,4 @@
-'use client'
+"use client";
 
 import { NO_QUESTION_HEADER } from '@/constants';
 import { useEffect, useRef, useState } from 'react';
@@ -64,7 +64,6 @@ export function QuestionsAggregated() {
     useEffect(() => {
         const initialFetch = async () => {
             await fetchQuestionsAsked();
-            await fetchNextQuestion();
 
             // setInterval(fetchNextQuestion, 10_000);
         };
