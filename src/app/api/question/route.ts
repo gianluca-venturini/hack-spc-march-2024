@@ -79,7 +79,7 @@ Next the user questions:
     }
     const parsedContent: { questions: [{ question: string; exclude: boolean}]} = JSON.parse(content);
 
-    if (parsedContent.questions.filter(q => q.exclude === true).length === 0) {
+    if (parsedContent.questions.filter(q => q.exclude === false).length === 0) {
         console.log('No new question');
         return new Response("", {
             status: 200,
