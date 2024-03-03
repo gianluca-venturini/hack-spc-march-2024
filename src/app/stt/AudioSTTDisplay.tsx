@@ -22,7 +22,8 @@ export default function AudioSTTDisplay({
             onSubmitTranscript={onReceiveTranscript}
             setIsProcessing={setIsProcessing}
         />
-        <div className="mt-4 space-y-4">
+        <div className="mt-4 text-sm text-gray-500 space-y-4 overflow-auto flex flex-col justify-end relative" style={{ maxHeight: '20.3vh' }}>
+            <div className="fade-to-black-gradient absolute top-0 left-0 w-full h-full z-10" style={{ pointerEvents: 'none', height: '50%' }}></div>
             {transcripts.map((transcript, index) => (
                 <div key={index}>{transcript}</div>
             ))}

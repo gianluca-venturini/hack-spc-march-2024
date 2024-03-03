@@ -27,6 +27,9 @@ body {
   }
 }
 
+.fade-to-black-gradient {
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.7) 0%, transparent 100%);
+}
 
 /* !*Additional global styles or Tailwind CSS configuration:*!*/
 /* @keyframes fadeIn {*/
