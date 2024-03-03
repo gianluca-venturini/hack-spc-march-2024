@@ -23,15 +23,8 @@ export async function POST(req: Request) {
         file: await toFile(buffer, file.name, { type: file.type }),
       });
 
-    // const fetchWithTimout = withTimeout(fetchTranscription, 5000);
-    // const fetchTranscriptionWithRetry = withRetry(fetchWithTimout, {
-    //   maxAttemps: 3,
-    //   delayMs: 1000,
-    // });
-
-    // call opeanai api for whister speech to text
     const result = await fetchTranscription().catch((error) => {
-      console.error("OpenAI Whister SST call failed.", error);
+      console.error("OpenAI Whisper SST call failed.", error);
     });
 
     if (result) {

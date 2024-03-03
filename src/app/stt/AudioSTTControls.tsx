@@ -36,21 +36,27 @@ export function AudioSTTControls({
     stopRecording,
     isAvailable,
     isRecording,
-    isDisabled: isMicDisabled,
+    isDisabled,
   } = useVoiceInput({
     onAudioData,
   });
 
   return (
-    <div className="relative text-center">
+    <div
+      className={isRecording ? "relative text-right" : "relative text-center"}
+    >
       <>
         {isAvailable && (
           <button
-            className="h-32 w-32 bg-red-500 hover:bg-red-600 text-white px-4 rounded-full p-6"
+            className={
+              isRecording
+                ? "h-16 w-16 text-sm bg-red-500 hover:bg-red-600 text-white px-4 rounded-full"
+                : "h-32 w-32 text-lg bg-green-500 hover:bg-green-600 text-white px-4 rounded-full p-6"
+            }
             onClick={isRecording ? stopRecording : startRecording}
-            disabled={isMicDisabled}
+            disabled={false}
           >
-            {isRecording ? "STOP RECORDING" : "TAP TO RECORD"}
+            {isRecording ? "Stop" : "Start"}
           </button>
         )}
       </>

@@ -33,10 +33,29 @@ export const useVoiceInput = ({
   const { acquireMicrophone, releaseMicrophone, hasMicrophone } =
     useMicrophone();
 
-  /**
-   * Start recording audio from the microphone. We'll accumulate a buffer of all audio
-   * recorder up until stopRecording is called.
-   */
+  const processAudio = useCallback(() => {
+    if (recorderRef.current) {
+      setIsDisabled(true);
+
+      recorderRef.current.ondataavailable = (event: BlobEvent) => {
+        if (event.data.size > 0) {
+          blobArrayRef.current.push(event.data);
+        }
+        let combinedBlob = new Blob(blobArrayRef.current, {
+          type: MIME_TYPE,
+        });
+        onAudioData(combinedBlob, MIME_TYPE);
+        blobArrayRef.current = [];
+      };
+
+      // this triggers the ondataavailable event, so we can extract the audio data
+      recorderRef.current.stop();
+
+      // restart the recorder so we can keep listening
+      recorderRef.current.start();
+    }
+  }, [onAudioData]);
+
   const startRecording = useCallback(async () => {
     setIsDisabled(true);
     const microphone = await acquireMicrophone();
@@ -51,7 +70,14 @@ export const useVoiceInput = ({
     // Set up harker to detect speech.
     // If there's no speech detected, we shouldn't send the audio to the backend.
     const harker = hark(microphone);
-    harker.on("speaking", () => setDetectedSpeech(true));
+    harker.on("speaking", () => {
+      console.log(">>> SPEAKING");
+      setDetectedSpeech(true);
+    });
+    harker.on("stopped_speaking", () => {
+      console.log(">>> STOPPED SPEAKING");
+      processAudio();
+    });
     harkerRef.current = harker;
 
     const recorderOptions = {
@@ -64,32 +90,16 @@ export const useVoiceInput = ({
     const recorder = new MediaRecorder(microphone, recorderOptions);
     recorderRef.current = recorder;
 
-    recorderRef.current.ondataavailable = (event: BlobEvent) => {
-      if (event.data.size > 0) {
-        blobArrayRef.current.push(event.data);
-      }
-    };
-
-    // Using timeSlice is necessary for this to work on Safari and iOS.
-    // While you can get audio/mp4 blobs without timeSlice, whisper cannot
-    // process them.
-    recorder.start(1000);
+    recorder.start();
     setIsRecording(true);
 
     return true;
-  }, [acquireMicrophone, MIME_TYPE]);
+  }, [acquireMicrophone, processAudio]);
 
-  /**
-   * Tear down harker, recorder and release microphone
-   */
-  const cleanup = useCallback(async () => {
-    if (harkerRef.current) {
-      // @ts-ignore
-      harkerRef.current?.off("speaking");
-      harkerRef.current?.stop();
-      harkerRef.current = null;
-      setDetectedSpeech(false);
-    }
+  const cleanup = useCallback(() => {
+    harkerRef.current?.stop();
+    harkerRef.current = null;
+
     if (recorderRef.current) {
       recorderRef.current.ondataavailable = null;
       recorderRef.current.stop();
@@ -98,41 +108,10 @@ export const useVoiceInput = ({
 
     setIsRecording(false);
     setIsDisabled(false);
+    setDetectedSpeech(false);
     releaseMicrophone();
   }, [releaseMicrophone]);
 
-  /**
-   * Stop recording, release/cleanup all resources, and emit the audio blob.
-   */
-  const stopRecording = useCallback(() => {
-    if (!detectedSpeech) {
-      console.log("Sorry, I didn't hear any speech. Please try again.");
-      cleanup();
-      return;
-    }
-
-    if (recorderRef.current) {
-      setIsDisabled(true);
-
-      recorderRef.current.ondataavailable = (event: BlobEvent) => {
-        if (event.data.size > 0) {
-          blobArrayRef.current.push(event.data);
-        }
-        let combinedBlob = new Blob(blobArrayRef.current, {
-          type: MIME_TYPE,
-        });
-        onAudioData(combinedBlob, MIME_TYPE);
-        blobArrayRef.current = [];
-        cleanup();
-      };
-
-      recorderRef.current.stop();
-    }
-  }, [MIME_TYPE, detectedSpeech, cleanup, onAudioData]);
-
-  /**
-   * Cleanup on component dismount
-   */
   useEffect(() => {
     return () => {
       cleanup();
@@ -145,6 +124,6 @@ export const useVoiceInput = ({
     isDisabled,
     hasMicrophone,
     startRecording,
-    stopRecording,
+    stopRecording: cleanup,
   };
 };

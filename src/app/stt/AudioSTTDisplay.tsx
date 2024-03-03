@@ -1,20 +1,27 @@
 "use client";
 
-import { useState } from "react";
 import { AudioSTTControls } from "./AudioSTTControls";
 import React from "react";
 
-export default function AudioSTTDisplay(props: { transcript: string | null, setTranscript: (text: string) => void }) {
-
-  // TODO: do whatever you like with the transcript
+export default function AudioSTTDisplay({
+  transcripts,
+  setTranscripts,
+}: {
+  transcripts: string[];
+  setTranscripts: (newTranscripts: string[]) => void;
+}) {
   const onReceiveTranscript = (text: string) => {
-    props.setTranscript(text);
+    setTranscripts([text, ...transcripts]);
   };
 
   return (
     <div>
       <AudioSTTControls onSubmitTranscript={onReceiveTranscript} />
-      <div className="mt-4">{props.transcript}</div>
+      <div className="mt-4 space-y-4">
+        {transcripts.map((transcript, index) => (
+          <div key={index}>{transcript}</div>
+        ))}
+      </div>
     </div>
   );
 }
