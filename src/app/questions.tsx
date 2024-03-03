@@ -121,7 +121,7 @@ export function QuestionsAggregated(props: { transcripts: string[]; isProcessing
         return () => {
             clearInterval(interval2);
         };
-    }, [fetchNextQuestion, questions, answeredQuestions, props.isProcessing]);
+    }, [props.isProcessing]);
 
 return (
     <div className="space-y-4">
