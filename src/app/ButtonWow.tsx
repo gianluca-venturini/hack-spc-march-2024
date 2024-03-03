@@ -210,7 +210,7 @@ export function ButtonWow(props: { isAnimating: boolean; value: string; onClick:
 
     return (
         <button className=" bgtransparent relative w-full h-64 flex justify-center items-center">
-            <canvas id="canvas" style={{ pointerEvents: 'none', transition: 'opacity 5s linear', opacity: props.isAnimating ? 1 : 0.05 }}></canvas>
+            <canvas id="canvas" style={{ pointerEvents: 'none', transition: 'opacity 2s linear', opacity: props.isAnimating ? 1 : 0.05 }}></canvas>
             <div
                 onClick={props.onClick}
                 className="absolute text-blue-500 inset-0 m-auto w-32 h-32 flex items-center justify-center"

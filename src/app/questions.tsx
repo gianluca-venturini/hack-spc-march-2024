@@ -106,6 +106,20 @@ export function QuestionsAggregated(props: { transcripts: string[]; isProcessing
 
 return (
     <div className="space-y-4">
+        <div className="flex space-x-4">
+            <button
+                className="border border-white text-white bg-transparent text-xs h-8 px-6 text-white rounded-full shadow-lg transition-all duration-150 ease-in-out transform hover:-translate-y-1 focus:outline-none focus:ring-4"
+                onClick={fetchNextQuestion}
+            >
+                Next
+            </button>
+            <button
+                className="border border-white text-white bg-transparent text-xs h-8 px-6 text-white rounded-full shadow-lg transition-all duration-150 ease-in-out transform hover:-translate-y-1 focus:outline-none focus:ring-4"
+                onClick={computeAnsweredQuestions}
+            >
+                Check
+            </button>
+        </div>
         <div>
             <div className="flex flex-col gap-2">
             {questions.map((q, i) => (
@@ -123,20 +137,6 @@ return (
                 </div>
             ))}
             </div>
-        </div>
-        <div className="flex space-x-4">
-            <button
-                className="border border-white text-white bg-transparent text-xs h-8 px-6 text-white rounded-full shadow-lg transition-all duration-150 ease-in-out transform hover:-translate-y-1 focus:outline-none focus:ring-4"
-                onClick={fetchNextQuestion}
-            >
-                Next
-            </button>
-            <button
-                className="border border-white text-white bg-transparent text-xs h-8 px-6 text-white rounded-full shadow-lg transition-all duration-150 ease-in-out transform hover:-translate-y-1 focus:outline-none focus:ring-4"
-                onClick={computeAnsweredQuestions}
-            >
-                Check
-            </button>
         </div>
     </div>
   );
