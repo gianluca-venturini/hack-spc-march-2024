@@ -28,3 +28,11 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+
+
+## Interact with APIs
+```
+curl -vvv https://localhost:3000/api/question
+curl -X POST -vvvv https://localhost:3000/api/ingest -d '{"questionText": "How much free time do you have now that you are CEO of open AI?"}'
+curl -X POST -vvvv http://localhost:3000/api/reset
+```

@@ -66,7 +66,7 @@ export function QuestionsAggregated() {
             await fetchQuestionsAsked();
             await fetchNextQuestion();
 
-            setInterval(fetchNextQuestion, 10_000);
+            // setInterval(fetchNextQuestion, 10_000);
         };
         if (!hasFetched.current) {
             initialFetch();
@@ -75,10 +75,15 @@ export function QuestionsAggregated() {
     }, []);
     
     return (
-        <div className="flex flex-col gap-4">
-            {questions.map((q, i) => (
-                <div key={i}>{q}</div>
-            ))}
+        <div>
+            <code className="font-mono font-bold">
+                <div className="flex flex-col gap-4">
+                    {questions.map((q, i) => (
+                        <div key={i}>{q}</div>
+                        ))}
+                </div>
+            </code>
+            <button onClick={fetchNextQuestion}>Next Question</button>
         </div>
     )
 }
