@@ -8,10 +8,10 @@ export default function AudioSTTDisplay({
   setTranscripts,
 }: {
   transcripts: string[];
-  setTranscripts: (newTranscripts: string[]) => void;
+  setTranscripts: React.Dispatch<React.SetStateAction<string[]>>;
 }) {
   const onReceiveTranscript = (text: string) => {
-    setTranscripts([text, ...transcripts]);
+    setTranscripts(t => ([...t, text]));
   };
 
   return (
