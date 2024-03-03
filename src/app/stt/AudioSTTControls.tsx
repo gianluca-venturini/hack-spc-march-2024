@@ -49,7 +49,7 @@ export function AudioSTTControls({
             {isAvailable && (
                 <ButtonWow 
                     isAnimating={isRecording}
-                    value={isRecording ? "End" : "Present"} 
+                    value={isRecording ? "END" : "PRESENT"} 
                     onClick={() => { 
                         if (isRecording) { 
                             stopRecording();

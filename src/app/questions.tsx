@@ -112,8 +112,8 @@ return (
                 <div
                     key={`${q}-${i}`}
                     className={`p-3 rounded-md transition-all duration-500 ease-in-out transform ${
-                        answeredQuestions.has(q) ? 'bg-green-100 text-green-800' : 'bg-gray-50 text-gray-800'
-                    } shadow hover:shadow-md`}
+                        answeredQuestions.has(q) ? 'bg-green-100 text-green-800' : 'text-gray-100'
+                    }`}
                     style={{ textDecoration: answeredQuestions.has(q) ? 'line-through' : '', opacity: answeredQuestions.has(q) ? 0 : 1, transition: 'opacity 5s ease-in-out'}}
                     onClick={() => {
                         animateOutAnsweredQuestions(q);
@@ -126,13 +126,13 @@ return (
         </div>
         <div className="flex space-x-4">
             <button
-                className="text-xs h-8 px-6 text-white rounded-full shadow-lg transition-all duration-150 ease-in-out transform hover:-translate-y-1 bg-gradient-to-r from-blue-500 to-teal-400 hover:from-blue-600 hover:to-teal-500 focus:outline-none focus:ring-4 focus:ring-blue-300"
+                className="border border-white text-white bg-transparent text-xs h-8 px-6 text-white rounded-full shadow-lg transition-all duration-150 ease-in-out transform hover:-translate-y-1 focus:outline-none focus:ring-4"
                 onClick={fetchNextQuestion}
             >
                 Next
             </button>
             <button
-                className="text-xs h-8 px-6 text-white rounded-full shadow-lg transition-all duration-150 ease-in-out transform hover:-translate-y-1 bg-gradient-to-r from-green-500 to-lime-400 hover:from-green-600 hover:to-lime-500 focus:outline-none focus:ring-4 focus:ring-green-300"
+                className="border border-white text-white bg-transparent text-xs h-8 px-6 text-white rounded-full shadow-lg transition-all duration-150 ease-in-out transform hover:-translate-y-1 focus:outline-none focus:ring-4"
                 onClick={computeAnsweredQuestions}
             >
                 Check

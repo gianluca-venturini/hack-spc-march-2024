@@ -116,7 +116,7 @@ export function ButtonWow(props: { isAnimating: boolean; value: string; onClick:
                         phase = mouseY / 200 + 1;
                     }
                     
-                    var r = radius + (props.isAnimating ? (swingpoints[i].range * phase * Math.sin(swingpoints[i].phase)) - rangeMax : 0);
+                    var r = radius + (props.isAnimating ? 1 : 0.05) * (swingpoints[i].range * phase * Math.sin(swingpoints[i].phase) - rangeMax);
                     
                     swingpoints[i].radian += pi / 360;
                     
@@ -210,13 +210,13 @@ export function ButtonWow(props: { isAnimating: boolean; value: string; onClick:
 
     return (
         <button className=" bgtransparent relative w-full h-64 flex justify-center items-center">
-            <canvas id="canvas" style={{ pointerEvents: 'none' }}></canvas>
+            <canvas id="canvas" style={{ pointerEvents: 'none', transition: 'opacity 5s linear', opacity: props.isAnimating ? 1 : 0.05 }}></canvas>
             <div
                 onClick={props.onClick}
-                className="absolute text-red-500 inset-0 m-auto w-32 h-32 flex items-center justify-center"
+                className="absolute text-blue-500 inset-0 m-auto w-32 h-32 flex items-center justify-center"
                 style={{
                     letterSpacing: 1,
-                    fontSize: '1em',
+                    fontSize: '1.2em',
                     fontWeight: 700,
                     fontFamily: "'Futura', 'Helvetica Neue', Helvetica",
                 }}
