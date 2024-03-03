@@ -119,8 +119,8 @@ return (
                 top: '20px', 
                 right: '20px', 
                 transform: 'translate(0,0)',
-                height: 100, 
-                width: 100, 
+                height: 200, 
+                width: 200, 
             } : {}),
         }} />
         <div className="flex space-x-4">
