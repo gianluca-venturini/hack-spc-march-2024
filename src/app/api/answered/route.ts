@@ -27,9 +27,10 @@ export async function POST(request: Request) {
     console.log("Question:", requestData.question);
 
     const systemPrompt = `
-You are trying to understand if a question has been answered by the user.
-Respond in JSON with \`{ answered: true }\` if the question has been answered.
-Respond in JSON  with \`{ answered: false }\` if the question has NOT been answered.
+You are trying to understand if a topic has been mentioned by the user.
+Partial answers or mentions are fine.
+Respond in JSON with \`{ answered: true }\` if something about the question has been mentioned.
+Respond in JSON  with \`{ answered: false }\` if something about the question has NOT been mentioned.
 Here the text:
 ${requestData.transcript}
 `;
