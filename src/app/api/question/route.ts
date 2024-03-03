@@ -35,16 +35,23 @@ export async function POST(request: Request) {
     console.log("Questions asked:", questionsAsked);
 
     const systemPrompt = `
-        You are summarizing the user questions from a crowd.
-        The response will be in json format \`{ question: '' }\`.
-        You want to use a friendly tone asking the shortest possible question.
-        Ask the most popular question.
-        If you don't have a new question, respond with \`{ noop: true }\`.
-        ${questionsAsked.length > 0 ? `Ignore any question similar to: \n${questionsAsked.map(q => `- ${q}`).join('\n')}` : ""}
-
-        ${requestData.transcript ? `Ignore any question in this speech ${requestData.transcript}` : ''}
-    `;
-    console.log(systemPrompt);
+You are summarizing the user questions from the crowd attending a talk.
+The response will be in json format \`{ questions: [{ question: string, exclude: boolean }] }\`.
+You want to use a friendly tone asking simple short questions. Summarize as many user questions as possible in a single question. Ask the most popular not answered and not asked questions first. Don't ask too many questions at once.
+===========
+Flag all the questions with \`exclude: true\` already asked or answered in the talk:
+\`\`\`
+${questionsAsked.map(q => `- ${q}`).join('\n')}
+\`\`\`
+===========
+\`\`\`
+${requestData.transcript ?? ''}
+\`\`\`
+===========
+Next the user questions:
+`;
+    console.log('systemPrompt\n', systemPrompt);
+    console.log('questions\n', questions.join("\n"));
 
     const response = await openaiClient.chat.completions.create({
         model: 'gpt-4-turbo-preview',
@@ -56,7 +63,6 @@ export async function POST(request: Request) {
                 content: systemPrompt,
             },
             { role: "user" as const, content: questions.join("\n") },
-            // ...questions.map(question => ({ role: 'user' as const, content: question })),
         ],
         stream: false,
     });
