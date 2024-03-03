@@ -26,7 +26,7 @@ export const useVoiceInput = ({
   const blobArrayRef = useRef<Blob[]>([]);
   const harkerRef = useRef<hark.Harker | null>(null);
 
-  // const [detectedSpeech, setDetectedSpeech] = useState(false);
+  const [detectedSpeech, setDetectedSpeech] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [isDisabled, setIsDisabled] = useState(false);
 
@@ -34,11 +34,26 @@ export const useVoiceInput = ({
     useMicrophone();
 
   const processAudio = useCallback(() => {
-    let combinedBlob = new Blob(blobArrayRef.current, {
-      type: MIME_TYPE,
-    });
-    onAudioData(combinedBlob, MIME_TYPE);
-    blobArrayRef.current = []; // Clear the array for the next recording segment
+    if (recorderRef.current) {
+      setIsDisabled(true);
+
+      recorderRef.current.ondataavailable = (event: BlobEvent) => {
+        if (event.data.size > 0) {
+          blobArrayRef.current.push(event.data);
+        }
+        let combinedBlob = new Blob(blobArrayRef.current, {
+          type: MIME_TYPE,
+        });
+        onAudioData(combinedBlob, MIME_TYPE);
+        blobArrayRef.current = [];
+      };
+
+      // this triggers the ondataavailable event, so we can extract the audio data
+      recorderRef.current.stop();
+
+      // restart the recorder so we can keep listening
+      recorderRef.current.start();
+    }
   }, [onAudioData]);
 
   const startRecording = useCallback(async () => {
@@ -57,12 +72,11 @@ export const useVoiceInput = ({
     const harker = hark(microphone);
     harker.on("speaking", () => {
       console.log(">>> SPEAKING");
-      // setDetectedSpeech(true);
-      // blobArrayRef.current = []; // Reset the blob array for a new sentence
+      setDetectedSpeech(true);
     });
     harker.on("stopped_speaking", () => {
       console.log(">>> STOPPED SPEAKING");
-      processAudio(); // Process the recorded audio when the speaker stops
+      processAudio();
     });
     harkerRef.current = harker;
 
@@ -75,13 +89,6 @@ export const useVoiceInput = ({
 
     const recorder = new MediaRecorder(microphone, recorderOptions);
     recorderRef.current = recorder;
-
-    recorder.ondataavailable = (event: BlobEvent) => {
-      console.log(">>> ON DATA AVAILABLE");
-      if (event.data.size > 0) {
-        blobArrayRef.current.push(event.data);
-      }
-    };
 
     recorder.start();
     setIsRecording(true);
@@ -101,7 +108,7 @@ export const useVoiceInput = ({
 
     setIsRecording(false);
     setIsDisabled(false);
-    // setDetectedSpeech(false);
+    setDetectedSpeech(false);
     releaseMicrophone();
   }, [releaseMicrophone]);
 
