@@ -5,16 +5,16 @@ import { nanoid } from "ai";
 import { useVoiceInput } from "./use-voice-input";
 
 export function AudioSTTControls({
-  onSubmitTranscript,
+    onSubmitTranscript,
+    setIsProcessing,
 }: {
-  onSubmitTranscript: (text: string) => void;
+    onSubmitTranscript: (text: string) => void;
+    setIsProcessing: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
   const [url, setUrl] = useState<string | null>(null);
-  const [isProcessing, setIsProcessing] = useState(false);
 
   const onAudioData = useCallback(
     async (audioData: Blob, mimeType: string) => {
-      setIsProcessing(true);
       const newUrl = URL.createObjectURL(audioData);
       const transcript = await performSttPost(audioData);
       console.log(
@@ -23,7 +23,6 @@ export function AudioSTTControls({
         ["local blob url", newUrl]
       );
       setUrl(newUrl);
-      setIsProcessing(false);
       if (transcript) {
         onSubmitTranscript(transcript);
       }
@@ -53,7 +52,14 @@ export function AudioSTTControls({
                 ? "h-16 w-16 text-sm bg-red-500 hover:bg-red-600 text-white px-4 rounded-full"
                 : "h-32 w-32 text-lg bg-green-500 hover:bg-green-600 text-white px-4 rounded-full p-6"
             }
-            onClick={isRecording ? stopRecording : startRecording}
+            onClick={() => { 
+              if (isRecording) { 
+                stopRecording();
+                setIsProcessing(false);
+            } else { 
+                startRecording();
+                setIsProcessing(true);
+            }}}
             disabled={false}
           >
             {isRecording ? "Stop" : "Start"}
