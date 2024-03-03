@@ -94,29 +94,39 @@ export function QuestionsAggregated(props: { transcripts: string[] }) {
         return () => clearInterval(interval);
     }, [computeAnsweredQuestions, fetchNextQuestion, fetchQuestionsAsked, questions, answeredQuestions]);
 
-    return (
-        <div>
-            <code className="font-mono font-bold">
-                <div className="flex flex-col gap-4">
-                {questions.map((q, i) => (
-                    <div key={i} style={{ textDecoration: answeredQuestions.has(q) ? 'line-through' : '' }}>{q}</div>
-                ))}
-                </div>
-            </code>
-            <button
-                className="h-20 w-20 bg-red-500 hover:bg-red-600 text-white px-4 rounded-full p-6"
-                onClick={fetchNextQuestion}
+return (
+    <div className="space-y-4">
+      <div className="p-4 bg-white rounded-lg shadow-lg">
+        <div className="flex flex-col gap-2">
+          {questions.map((q, i) => (
+            <div
+              key={i}
+              className={`p-3 rounded-md transition-all duration-500 ease-in-out transform ${
+                answeredQuestions.has(q) ? 'bg-green-100 text-green-800' : 'bg-gray-50 text-gray-800'
+              } shadow hover:shadow-md`}
+              style={{ textDecoration: answeredQuestions.has(q) ? 'line-through' : '' }}
             >
-                Next
-            </button>
-            <button
-                className="h-20 w-20 bg-red-500 hover:bg-red-600 text-white px-4 rounded-full p-6"
-                onClick={computeAnsweredQuestions}
-            >
-                Check
-            </button>
+              <span className={`block text-sm font-medium transition-opacity duration-300 ${answeredQuestions.has(q) ? 'opacity-50' : 'opacity-100'}`}>{q}</span>
+            </div>
+          ))}
         </div>
-    );
+      </div>
+      <div className="flex space-x-4">
+        <button
+          className="h-12 px-6 text-white rounded-full shadow-lg transition-all duration-150 ease-in-out transform hover:-translate-y-1 bg-gradient-to-r from-blue-500 to-teal-400 hover:from-blue-600 hover:to-teal-500 focus:outline-none focus:ring-4 focus:ring-blue-300"
+          onClick={fetchNextQuestion}
+        >
+          Next
+        </button>
+        <button
+          className="h-12 px-6 text-white rounded-full shadow-lg transition-all duration-150 ease-in-out transform hover:-translate-y-1 bg-gradient-to-r from-green-500 to-lime-400 hover:from-green-600 hover:to-lime-500 focus:outline-none focus:ring-4 focus:ring-green-300"
+          onClick={computeAnsweredQuestions}
+        >
+          Check
+        </button>
+      </div>
+    </div>
+  );
 }
 
 function computeNotAnsweredQuestions(questions: string[], answeredQuestions: Set<string>) {
