@@ -70,3 +70,7 @@ curl -X POST -vvvv http://localhost:3000/api/ingest -d '{"questionText": "Can yo
 curl -X POST -vvvv http://localhost:3000/api/ingest -d '{"questionText": "What is the specific sport that Harry Potter competes in?"}' &&
 curl -X POST -vvvv http://localhost:3000/api/ingest -d '{"questionText": "In the world of Harry Potter, what sport does he take part in?"}'
 ```
+
+## Demo
+
+https://www.loom.com/share/ac6eb60e0b0f49769a05eeb1279a5427?sid=eed0adf6-f0d6-4c41-b377-eec72af0d603
